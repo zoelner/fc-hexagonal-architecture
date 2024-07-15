@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"github.com/stretchr/testify/require"
 	"github.com/zoelner/hexagonal-architecture/adapters/db"
+	"github.com/zoelner/hexagonal-architecture/application"
 	"log"
 	"testing"
 )
@@ -50,4 +51,26 @@ func TestProductDb_Get(t *testing.T) {
 	require.Equal(t, "disabled", product.GetStatus())
 }
 
-func Test
+func TestProductDb_Update(t *testing.T) {
+	setUp()
+	defer Db.Close()
+	productDb := db.NewProductDb(Db)
+
+	product := application.NewProduct()
+	product.Name = "Product Test"
+	product.Price = 25
+
+	productResult, err := productDb.Save(product)
+	require.Nil(t, err)
+	require.Equal(t, product.Name, productResult.GetName())
+	require.Equal(t, product.Price, productResult.GetPrice())
+	require.Equal(t, product.Status, productResult.GetStatus())
+
+	product.Status = "enabled"
+
+	productResult, err = productDb.Save(product)
+	require.Nil(t, err)
+	require.Equal(t, product.Name, productResult.GetName())
+	require.Equal(t, product.Price, productResult.GetPrice())
+	require.Equal(t, product.Status, productResult.GetStatus())
+}
